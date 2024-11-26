@@ -8,12 +8,16 @@
 }
 else
 {
-    @foreach (var movie in movies.results)
-    {
-        <img src="@($"https://image.tmdb.org/t/p/w200{movie.poster_path}")" alt="@movie.title" />
-        <h3>@movie.title</h3>
-        <p>Release Date: @movie.release_date</p>
-    }
+    <div class="movies-grid">
+        @foreach (var movie in movies.results) // loops through the list of movies in the API response
+        {
+            <div class="movie-card">
+                <img src="@($"https://image.tmdb.org/t/p/w200{movie.poster_path}")" alt="@movie.title" />
+                <h3>@movie.title</h3>
+                <p>Release Date: @movie.release_date</p>
+            </div>
+        }
+    </div>
 }
 
 @code {
