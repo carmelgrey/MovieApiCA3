@@ -1,0 +1,48 @@
+﻿@page "/popular-movies"
+@inject HttpClient Http
+
+<h1>Popular Movies</h1>
+@if (movies == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var movie in movies.results)
+    {
+        <img src="@($"https://image.tmdb.org/t/p/w200{movie.poster_path}")" alt="@movie.title" />
+        <h3>@movie.title</h3>
+        <p>Release Date: @movie.release_date</p>
+    }
+}
+
+@code {
+    private MovieResponse movies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // pulling the popular movies from api
+            movies = await Http.GetFromJsonAsync<MovieResponse>(
+                "https://api.themoviedb.org/3/movie/popular?api_key=465fa49463bdb0beb19a2cecf51ce0f9"
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching movies: {ex.Message}");
+        }
+    }
+
+    public class MovieResponse
+    {
+        public List<Movie> results { get; set; }
+    }
+
+    public class Movie
+    {
+        public string title { get; set; }  // getting the title
+        public string poster_path { get; set; }  // poster path so i can pull the poster image - needs the website not the api path
+        public string release_date { get; set; }  // get the release date for under the poster
+    }
+}
