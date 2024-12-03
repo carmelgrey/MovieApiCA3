@@ -1,0 +1,126 @@
+﻿@page "/movie/{MovieId:int}"
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+
+    .movie-details {
+        display: flex;
+        gap: 20px;
+    }
+
+    .movie-poster img {
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 300px;
+    }
+
+    .movie-title {
+        margin-bottom: 10px;
+        font-size: 2rem;
+    }
+
+    .movie-release-date {
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    .movie-overview {
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .loading {
+        text-align: center;
+        font-size: 1.5rem;
+    }
+</style>
+
+<div class="container">
+    @if (movie != null)
+    {
+        <div class="movie-details">
+            <!-- movie poster -->
+            <div class="movie-poster">
+                <img src="@GetImageUrl(movie.poster_path)"
+                     alt="@movie.title poster"
+                     onerror="this.src='https://via.placeholder.com/300x450?text=No+Image';" />
+            </div>
+
+            <!-- movie detail info -->
+            <div>
+                <h2 class="movie-title">@movie.title</h2>
+                <p class="movie-release-date">
+                    <em>Release Date:</em> @movie.release_date
+                </p>
+                <p class="movie-overview">
+                    <strong>Overview:</strong> @movie.overview
+                </p>
+                <p>
+                    <strong>Rating:</strong> ⭐ @movie.vote_average / 10
+                </p>
+                <p>
+                    <strong>Genres:</strong> @string.Join(", ", movie.genres.Select(g => g.name))
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="loading">Loading...</p>
+    }
+</div>
+
+@code {
+    [Parameter] public int MovieId { get; set; }
+    private Movie movie;
+
+    private HttpClient Http = new HttpClient();
+    private const string ApiKey = "465fa49463bdb0beb19a2cecf51ce0f9";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var apiUrl = $"https://api.themoviedb.org/3/movie/{MovieId}?api_key={ApiKey}";
+            movie = await Http.GetFromJsonAsync<Movie>(apiUrl);
+            Console.WriteLine($"Fetched movie: {movie?.title ?? "null"}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading movie details: {ex.Message}");
+        }
+    }
+
+    // getting the image URL
+    public string GetImageUrl(string posterPath)
+    {
+        if (string.IsNullOrEmpty(posterPath))
+        {
+            return "https://via.placeholder.com/300x450?text=No+Image";
+        }
+
+        return $"https://image.tmdb.org/t/p/w500{posterPath}";
+    }
+
+    public class Movie
+    {
+        public int id { get; set; }
+        public string title { get; set; }
+        public string release_date { get; set; }
+        public string overview { get; set; }
+        public string poster_path { get; set; }
+        public double vote_average { get; set; }
+        public List<Genre> genres { get; set; }
+    }
+
+    public class Genre
+    {
+        public string name { get; set; }
+    }
+}

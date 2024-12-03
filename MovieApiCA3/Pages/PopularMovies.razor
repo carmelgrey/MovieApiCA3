@@ -1,36 +1,95 @@
 ﻿@page "/popular-movies"
 @inject HttpClient Http
 
-<h1>Popular Movies</h1>
+@*css*@
+<style>
+    h1.text-center {
+        font-size: 2.5rem;
+        margin: 20px 0;
+    }
+
+    .movies-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .movie-card {
+        width: 200px;
+        text-align: center;
+    }
+
+        .movie-card img {
+            border-radius: 10px;
+            width: 100%;
+        }
+
+        .movie-card h3 {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .movie-card p {
+            margin: 5px 0;
+        }
+
+    .pagination-controls {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+</style>
+
+<h1 class="text-center">Popular Movies</h1>
+
 @if (movies == null)
 {
     <p>Loading...</p>
 }
 else
 {
+    <!-- display movies  -->
     <div class="movies-grid">
-        @foreach (var movie in movies.results) // loops through the list of movies in the API response
+        @foreach (var movie in movies.results.Take(12))
         {
             <div class="movie-card">
-                <img src="@($"https://image.tmdb.org/t/p/w200{movie.poster_path}")" alt="@movie.title" />
+                <a href="/movie/@movie.id">
+                    <img src="@($"https://image.tmdb.org/t/p/w200{movie.poster_path}")"
+                         alt="@movie.title"
+                         onerror="this.src='https://via.placeholder.com/200x300?text=No+Image';" />
+                </a>
                 <h3>@movie.title</h3>
-                <p>Release Date: @movie.release_date</p>
+                <p><strong>Release Date:</strong> @movie.release_date</p>
+                <p><strong>Rating:</strong> ⭐ @movie.vote_average / 10</p>
+                <a href="/movie/@movie.id" class="btn btn-outline-primary">View Details</a>
             </div>
         }
     </div>
+
 }
 
 @code {
     private MovieResponse movies;
+    private int currentPage = 1;
+    private int totalPages;
 
     protected override async Task OnInitializedAsync()
     {
+        await FetchMoviesPage(currentPage);
+    }
+
+    private async Task FetchMoviesPage(int page)
+    {
         try
         {
-            // pulling the popular movies from api
-            movies = await Http.GetFromJsonAsync<MovieResponse>(
-                "https://api.themoviedb.org/3/movie/popular?api_key=465fa49463bdb0beb19a2cecf51ce0f9"
+            // getting popular movies from TMDB API with the page parameter
+            var response = await Http.GetFromJsonAsync<MovieResponse>(
+                $"https://api.themoviedb.org/3/movie/popular?api_key=465fa49463bdb0beb19a2cecf51ce0f9&page={page}"
             );
+
+            movies = response;  // storing the movies from the get into movies
         }
         catch (Exception ex)
         {
@@ -41,12 +100,15 @@ else
     public class MovieResponse
     {
         public List<Movie> results { get; set; }
+        public int total_pages { get; set; }
     }
 
     public class Movie
     {
-        public string title { get; set; }  // getting the title
-        public string poster_path { get; set; }  // poster path so i can pull the poster image - needs the website not the api path
-        public string release_date { get; set; }  // get the release date for under the poster
+        public int id { get; set; }  // movie id for linking to details page
+        public string title { get; set; }  // movie title
+        public string poster_path { get; set; }  // poster image path
+        public string release_date { get; set; }  // release date
+        public double vote_average { get; set; }  // average rating
     }
 }
