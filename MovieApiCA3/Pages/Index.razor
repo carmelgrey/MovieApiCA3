@@ -1,11 +1,38 @@
 ﻿@page "/"
+<style>
+    .container {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    .text-muted {
+        font-size: 1.1rem;
+    }
+</style>
 
 <PageTitle>Movies</PageTitle>
 
-<h1 class="text-center">Welcome to the movie database</h1>
+<div class="container my-5">
+    <h1 class="text-center mb-4">Welcome to the Movie Database</h1>
 
-<!-- Links to Search Movies and Popular Movies pages -->
-<div class="d-flex justify-content-center mt-4">
-    <a href="/search-movies" class="btn btn-primary me-2">Search Movies</a>
-    <a href="/popular-movies" class="btn btn-primary">Popular Movies</a>
+    <p class="text-center text-muted">
+        Explore a world of movies. Search for your favorite titles or check out the most popular ones.
+    </p>
+
+    <!-- links to Search Movies and Popular Movies pages -->
+    <div class="d-flex justify-content-center mt-4">
+        <a href="/popular-movies" class="btn btn-lg btn-primary me-3 px-4">Popular Movies</a>
+        <a href="/search-movies" class="btn btn-lg btn-primary px-4">Search Movies</a>
+    </div>
 </div>
+
+
